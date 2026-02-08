@@ -159,7 +159,7 @@ export default function Dashboard() {
 
       {/* Driver Table */}
       <DriverTable
-        drivers={drivers}
+        drivers={[...drivers].sort((a, b) => Number(b.included) - Number(a.included))}
         onToggleVehicleAssigned={toggleVehicleAssigned}
         onToggleFollowedPlan={toggleFollowedPlan}
         onToggleIncluded={toggleIncluded}
