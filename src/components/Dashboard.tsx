@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -14,15 +14,31 @@ import {
   Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { Driver, initialDrivers } from "@/data/drivers";
 import DriverTable from "@/components/DriverTable";
 import PieChartCard from "@/components/PieChartCard";
 import StatsBar from "@/components/StatsBar";
 
+const STORAGE_KEY = "hos-dashboard-drivers";
+
 export default function Dashboard() {
-  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
+  const [drivers, setDrivers] = useState<Driver[]>(() => {
+    if (typeof window === "undefined") return initialDrivers;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : initialDrivers;
+    } catch {
+      return initialDrivers;
+    }
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newDriverName, setNewDriverName] = useState("");
+
+  // Persist to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(drivers));
+  }, [drivers]);
 
   const toggleVehicleAssigned = (id: number) => {
     setDrivers((prev) =>
@@ -148,13 +164,26 @@ export default function Dashboard() {
             {counted.length} of {drivers.length} included in stats
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setDialogOpen(true)}
-        >
-          Add Driver
-        </Button>
+        <Box display="flex" gap={1}>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<RestartAltIcon />}
+            onClick={() => {
+              localStorage.removeItem(STORAGE_KEY);
+              setDrivers(initialDrivers);
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setDialogOpen(true)}
+          >
+            Add Driver
+          </Button>
+        </Box>
       </Box>
 
       {/* Driver Table */}

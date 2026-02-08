@@ -23,9 +23,14 @@ No backend or database required. All data lives in the browser.
   - *Vehicle Assigned While Driving* — toggle on/off
   - *Followed the Plan* — toggle on/off
 - **Interactive Toggles** — Click any switch to flip a driver's status; charts update instantly
-- **Pie Charts** — Two side-by-side pie charts showing the percentage breakdown for each criteria
-- **Stats Bar** — Quick-glance summary cards showing total drivers and compliance rates
+- **Include/Exclude Drivers** — Checkbox per driver to include or exclude them from stats and charts; excluded drivers move to the bottom of the table
+- **Reason Tracking** — When a driver has "No" for either criteria, click the note icon to add a reason why (e.g., "Route was changed last minute")
+- **Pie Charts** — Two side-by-side pie charts showing the percentage breakdown for each criteria (only counts included drivers)
+- **Stats Bar** — Quick-glance summary cards showing counted drivers and compliance rates
 - **Add Driver** — Click "Add Driver" to add new drivers on the fly via a dialog form
+- **Data Persistence** — All changes are saved to `localStorage` and survive page refreshes
+- **Reset Button** — Click "Reset" to clear all saved data and restore the original driver list
+- **Dark Mode** — Full dark theme UI
 - **Responsive Layout** — Stacks vertically on mobile, side-by-side on desktop
 
 ---
@@ -36,30 +41,37 @@ No backend or database required. All data lives in the browser.
 src/
 ├── app/
 │   ├── layout.tsx          # Root layout with MUI ThemeProvider
-│   ├── page.tsx            # Main dashboard page (client component)
-│   └── globals.css         # Minimal global styles
+│   ├── page.tsx            # Entry point, dynamically loads Dashboard (no SSR)
+│   └── globals.css         # Minimal global styles (dark mode)
 ├── components/
-│   ├── ThemeRegistry.tsx   # MUI + Emotion provider for Next.js App Router
-│   ├── DriverTable.tsx     # MUI Table with Switch toggles and Chip indicators
+│   ├── ThemeRegistry.tsx   # MUI + Emotion cache provider for Next.js App Router
+│   ├── Dashboard.tsx       # Main dashboard with state, localStorage, and all logic
+│   ├── DriverTable.tsx     # MUI Table with toggles, checkboxes, and reason dialogs
 │   ├── PieChartCard.tsx    # MUI Card wrapping a Recharts PieChart
-│   └── StatsBar.tsx        # Summary stat cards (Total Drivers, % Compliant)
+│   └── StatsBar.tsx        # Summary stat cards (Counted Drivers, % Compliant)
 └── data/
-    └── drivers.ts          # Sample driver data and TypeScript types
+    └── drivers.ts          # Default driver list and TypeScript types
 ```
 
 ---
 
 ## How It Works
 
-1. **Data** — A hardcoded array of driver objects is defined in `src/data/drivers.ts`. Each driver has an `id`, `name`, `vehicleAssigned` (boolean), and `followedPlan` (boolean).
+1. **Data** — A default array of driver objects is defined in `src/data/drivers.ts`. Each driver has an `id`, `name`, `vehicleAssigned`, `followedPlan`, `included` (whether to count them), `vehicleReason`, and `planReason`.
 
-2. **State** — The main page (`src/app/page.tsx`) loads this data into React `useState`. All components read from and write to this single state.
+2. **Persistence** — On first load, the app checks `localStorage` for saved data. If found, it uses that; otherwise it falls back to the default driver list. Every change auto-saves to `localStorage`, so data survives page refreshes.
 
-3. **Toggling** — When you click a switch in the table, the corresponding driver's boolean field flips. Since the pie charts and stats bar derive their values from the same state array, they re-render automatically with updated percentages.
+3. **Toggling** — When you click a switch in the table, the corresponding driver's boolean field flips. The pie charts and stats bar only count drivers with the "Count" checkbox enabled, and re-render automatically.
 
-4. **Adding Drivers** — The "Add Driver" button opens a MUI Dialog. Enter a name and click "Add" — the new driver is appended with both criteria defaulting to "No".
+4. **Include/Exclude** — Each driver has a checkbox in the "Count" column. Unchecking it excludes that driver from all stats and charts, and moves them to the bottom of the table (visually faded).
 
-5. **Charts** — Each `PieChartCard` receives a `yesCount` and `noCount`, computes percentages, and renders a Recharts `PieChart` with green (Yes) and red (No) segments. Labels show the percentage inside each slice.
+5. **Reasons** — When a driver has "No" for either criteria, a note icon appears. Click it to open a dialog and record why (e.g., "Vehicle was in maintenance"). The reason is shown on hover. Reasons auto-clear when toggled back to "Yes".
+
+6. **Adding Drivers** — The "Add Driver" button opens a MUI Dialog. Enter a name and click "Add" — the new driver is appended with both criteria defaulting to "No".
+
+7. **Reset** — The "Reset" button clears `localStorage` and restores the original default driver list.
+
+8. **Charts** — Each `PieChartCard` receives a `yesCount` and `noCount` (from included drivers only), computes percentages, and renders a Recharts `PieChart` with green (Yes) and red (No) segments.
 
 ---
 
@@ -193,12 +205,12 @@ To change the default driver list, edit `src/data/drivers.ts`:
 
 ```typescript
 export const initialDrivers: Driver[] = [
-  { id: 1, name: "Your Driver", vehicleAssigned: true, followedPlan: false },
+  { id: 1, name: "Your Driver", vehicleAssigned: false, followedPlan: false, included: true, vehicleReason: "", planReason: "" },
   // Add or remove drivers as needed
 ];
 ```
 
-The app will pick up changes immediately on the next page load.
+After editing, click the **Reset** button in the dashboard (or clear localStorage) to load the new defaults.
 
 ---
 
