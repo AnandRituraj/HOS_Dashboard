@@ -12,17 +12,18 @@ interface StatsBarProps {
 }
 
 export default function StatsBar({ drivers }: StatsBarProps) {
-  const total = drivers.length;
-  const vehicleYes = drivers.filter((d) => d.vehicleAssigned).length;
-  const planYes = drivers.filter((d) => d.followedPlan).length;
+  const counted = drivers.filter((d) => d.included);
+  const total = counted.length;
+  const vehicleYes = counted.filter((d) => d.vehicleAssigned).length;
+  const planYes = counted.filter((d) => d.followedPlan).length;
 
   const vehiclePct = total > 0 ? ((vehicleYes / total) * 100).toFixed(1) : "0";
   const planPct = total > 0 ? ((planYes / total) * 100).toFixed(1) : "0";
 
   const stats = [
     {
-      label: "Total Drivers",
-      value: total,
+      label: "Counted Drivers",
+      value: `${total} / ${drivers.length}`,
       icon: <PeopleIcon sx={{ fontSize: 36, color: "primary.main" }} />,
       color: "primary.main",
     },

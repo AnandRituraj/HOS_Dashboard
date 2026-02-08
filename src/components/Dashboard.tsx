@@ -27,7 +27,13 @@ export default function Dashboard() {
   const toggleVehicleAssigned = (id: number) => {
     setDrivers((prev) =>
       prev.map((d) =>
-        d.id === id ? { ...d, vehicleAssigned: !d.vehicleAssigned } : d
+        d.id === id
+          ? {
+              ...d,
+              vehicleAssigned: !d.vehicleAssigned,
+              vehicleReason: !d.vehicleAssigned ? "" : d.vehicleReason,
+            }
+          : d
       )
     );
   };
@@ -35,8 +41,32 @@ export default function Dashboard() {
   const toggleFollowedPlan = (id: number) => {
     setDrivers((prev) =>
       prev.map((d) =>
-        d.id === id ? { ...d, followedPlan: !d.followedPlan } : d
+        d.id === id
+          ? {
+              ...d,
+              followedPlan: !d.followedPlan,
+              planReason: !d.followedPlan ? "" : d.planReason,
+            }
+          : d
       )
+    );
+  };
+
+  const toggleIncluded = (id: number) => {
+    setDrivers((prev) =>
+      prev.map((d) =>
+        d.id === id ? { ...d, included: !d.included } : d
+      )
+    );
+  };
+
+  const updateReason = (
+    id: number,
+    field: "vehicleReason" | "planReason",
+    value: string
+  ) => {
+    setDrivers((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, [field]: value } : d))
     );
   };
 
@@ -51,17 +81,21 @@ export default function Dashboard() {
         name: newDriverName.trim(),
         vehicleAssigned: false,
         followedPlan: false,
+        included: true,
+        vehicleReason: "",
+        planReason: "",
       },
     ]);
     setNewDriverName("");
     setDialogOpen(false);
   };
 
-  // Compute stats for pie charts
-  const vehicleYes = drivers.filter((d) => d.vehicleAssigned).length;
-  const vehicleNo = drivers.length - vehicleYes;
-  const planYes = drivers.filter((d) => d.followedPlan).length;
-  const planNo = drivers.length - planYes;
+  // Only count included drivers for stats and charts
+  const counted = drivers.filter((d) => d.included);
+  const vehicleYes = counted.filter((d) => d.vehicleAssigned).length;
+  const vehicleNo = counted.length - vehicleYes;
+  const planYes = counted.filter((d) => d.followedPlan).length;
+  const planNo = counted.length - planYes;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -106,9 +140,14 @@ export default function Dashboard() {
         alignItems="center"
         mb={2}
       >
-        <Typography variant="h5" fontWeight={600}>
-          Drivers
-        </Typography>
+        <Box>
+          <Typography variant="h5" fontWeight={600}>
+            Drivers
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {counted.length} of {drivers.length} included in stats
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -123,6 +162,8 @@ export default function Dashboard() {
         drivers={drivers}
         onToggleVehicleAssigned={toggleVehicleAssigned}
         onToggleFollowedPlan={toggleFollowedPlan}
+        onToggleIncluded={toggleIncluded}
+        onUpdateReason={updateReason}
       />
 
       {/* Add Driver Dialog */}

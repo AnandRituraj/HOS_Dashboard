@@ -10,19 +10,38 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme({
   palette: {
-    mode: "light",
+    mode: "dark",
     primary: {
-      main: "#1976d2",
+      main: "#90caf9",
     },
     secondary: {
-      main: "#dc004e",
+      main: "#f48fb1",
     },
     background: {
-      default: "#f5f5f5",
+      default: "#121212",
+      paper: "#1e1e1e",
+    },
+    success: {
+      main: "#66bb6a",
+    },
+    error: {
+      main: "#f44336",
+    },
+    info: {
+      main: "#29b6f6",
     },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: "none",
+        },
+      },
+    },
   },
 });
 
