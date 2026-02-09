@@ -18,6 +18,8 @@ import AddIcon from "@mui/icons-material/Add";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SummarizeIcon from "@mui/icons-material/Summarize";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import { Driver, initialDrivers } from "@/data/drivers";
 import DriverTable from "@/components/DriverTable";
 import PieChartCard from "@/components/PieChartCard";
@@ -74,6 +76,15 @@ export default function Dashboard() {
       return localStorage.getItem(SUMMARY_STORAGE_KEY) || "";
     } catch {
       return "";
+    }
+  });
+  const [editingSummary, setEditingSummary] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      const saved = localStorage.getItem(SUMMARY_STORAGE_KEY);
+      return !saved || saved.trim() === "";
+    } catch {
+      return true;
     }
   });
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -244,45 +255,71 @@ export default function Dashboard() {
 
       {/* Management Summary */}
       <Box mb={4}>
-        <Box display="flex" alignItems="center" gap={1} mb={1.5}>
-          <SummarizeIcon color="primary" />
-          <Typography variant="h5" fontWeight={600}>
-            Management Summary
-          </Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1.5}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <SummarizeIcon color="primary" />
+            <Typography variant="h5" fontWeight={600}>
+              Management Summary
+            </Typography>
+          </Box>
+          {editingSummary ? (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SaveIcon />}
+              onClick={() => setEditingSummary(false)}
+              disabled={!summary.trim()}
+            >
+              Save
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon />}
+              onClick={() => setEditingSummary(true)}
+            >
+              Edit
+            </Button>
+          )}
         </Box>
-        <Typography variant="body2" color="text.secondary" mb={1.5}>
-          Key points, suggestions, and takeaways for management review.
-          Use each line as a bullet point.
-        </Typography>
-        <TextField
-          fullWidth
-          multiline
-          minRows={4}
-          maxRows={12}
-          variant="outlined"
-          placeholder={"- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"}
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "background.paper",
-            },
-          }}
-        />
-        {summary.trim() && (
+
+        {editingSummary ? (
+          <>
+            <Typography variant="body2" color="text.secondary" mb={1.5}>
+              Key points, suggestions, and takeaways for management review.
+              Use each line as a bullet point.
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              minRows={4}
+              maxRows={12}
+              variant="outlined"
+              placeholder={"- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "background.paper",
+                },
+              }}
+            />
+          </>
+        ) : (
           <Box
-            mt={2}
             p={2}
             sx={{
               backgroundColor: "background.paper",
               borderRadius: 2,
               border: "1px solid",
               borderColor: "divider",
+              cursor: "pointer",
+              "&:hover": { borderColor: "primary.main" },
+              transition: "border-color 0.2s",
             }}
+            onClick={() => setEditingSummary(true)}
           >
-            <Typography variant="subtitle2" color="primary" mb={1}>
-              Preview
-            </Typography>
             {summary
               .split("\n")
               .filter((line) => line.trim())
