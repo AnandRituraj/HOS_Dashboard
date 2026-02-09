@@ -242,58 +242,8 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Driver Table Header + Add Button */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Box>
-          <Typography variant="h5" fontWeight={600}>
-            Drivers
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {counted.length} of {drivers.length} included in stats
-          </Typography>
-        </Box>
-        <Box display="flex" gap={1}>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<RestartAltIcon />}
-            onClick={() => {
-              localStorage.removeItem(STORAGE_KEY);
-              localStorage.removeItem(WEEK_STORAGE_KEY);
-              localStorage.removeItem(SUMMARY_STORAGE_KEY);
-              setDrivers(initialDrivers);
-              setWeek(getDefaultWeek());
-              setSummary("");
-            }}
-          >
-            Reset
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setDialogOpen(true)}
-          >
-            Add Driver
-          </Button>
-        </Box>
-      </Box>
-
-      {/* Driver Table */}
-      <DriverTable
-        drivers={[...drivers].sort((a, b) => Number(b.included) - Number(a.included))}
-        onToggleVehicleAssigned={toggleVehicleAssigned}
-        onToggleFollowedPlan={toggleFollowedPlan}
-        onToggleIncluded={toggleIncluded}
-        onUpdateReason={updateReason}
-      />
-
       {/* Management Summary */}
-      <Box mt={4}>
+      <Box mb={4}>
         <Box display="flex" alignItems="center" gap={1} mb={1.5}>
           <SummarizeIcon color="primary" />
           <Typography variant="h5" fontWeight={600}>
@@ -346,6 +296,56 @@ export default function Dashboard() {
           </Box>
         )}
       </Box>
+
+      {/* Driver Table Header + Add Button */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Box>
+          <Typography variant="h5" fontWeight={600}>
+            Drivers
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {counted.length} of {drivers.length} included in stats
+          </Typography>
+        </Box>
+        <Box display="flex" gap={1}>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<RestartAltIcon />}
+            onClick={() => {
+              localStorage.removeItem(STORAGE_KEY);
+              localStorage.removeItem(WEEK_STORAGE_KEY);
+              localStorage.removeItem(SUMMARY_STORAGE_KEY);
+              setDrivers(initialDrivers);
+              setWeek(getDefaultWeek());
+              setSummary("");
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setDialogOpen(true)}
+          >
+            Add Driver
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Driver Table */}
+      <DriverTable
+        drivers={[...drivers].sort((a, b) => Number(b.included) - Number(a.included))}
+        onToggleVehicleAssigned={toggleVehicleAssigned}
+        onToggleFollowedPlan={toggleFollowedPlan}
+        onToggleIncluded={toggleIncluded}
+        onUpdateReason={updateReason}
+      />
 
       {/* Add Driver Dialog */}
       <Dialog
