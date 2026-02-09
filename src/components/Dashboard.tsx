@@ -17,6 +17,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import SummarizeIcon from "@mui/icons-material/Summarize";
 import { Driver, initialDrivers } from "@/data/drivers";
 import DriverTable from "@/components/DriverTable";
 import PieChartCard from "@/components/PieChartCard";
@@ -24,6 +25,7 @@ import StatsBar from "@/components/StatsBar";
 
 const STORAGE_KEY = "hos-dashboard-drivers";
 const WEEK_STORAGE_KEY = "hos-dashboard-week";
+const SUMMARY_STORAGE_KEY = "hos-dashboard-summary";
 
 function getDefaultWeek() {
   const today = new Date();
@@ -66,6 +68,14 @@ export default function Dashboard() {
       return getDefaultWeek();
     }
   });
+  const [summary, setSummary] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      return localStorage.getItem(SUMMARY_STORAGE_KEY) || "";
+    } catch {
+      return "";
+    }
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newDriverName, setNewDriverName] = useState("");
 
@@ -77,6 +87,10 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem(WEEK_STORAGE_KEY, JSON.stringify(week));
   }, [week]);
+
+  useEffect(() => {
+    localStorage.setItem(SUMMARY_STORAGE_KEY, summary);
+  }, [summary]);
 
   const toggleVehicleAssigned = (id: number) => {
     setDrivers((prev) =>
@@ -251,8 +265,10 @@ export default function Dashboard() {
             onClick={() => {
               localStorage.removeItem(STORAGE_KEY);
               localStorage.removeItem(WEEK_STORAGE_KEY);
+              localStorage.removeItem(SUMMARY_STORAGE_KEY);
               setDrivers(initialDrivers);
               setWeek(getDefaultWeek());
+              setSummary("");
             }}
           >
             Reset
@@ -275,6 +291,61 @@ export default function Dashboard() {
         onToggleIncluded={toggleIncluded}
         onUpdateReason={updateReason}
       />
+
+      {/* Management Summary */}
+      <Box mt={4}>
+        <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+          <SummarizeIcon color="primary" />
+          <Typography variant="h5" fontWeight={600}>
+            Management Summary
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" mb={1.5}>
+          Key points, suggestions, and takeaways for management review.
+          Use each line as a bullet point.
+        </Typography>
+        <TextField
+          fullWidth
+          multiline
+          minRows={4}
+          maxRows={12}
+          variant="outlined"
+          placeholder={"- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"}
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "background.paper",
+            },
+          }}
+        />
+        {summary.trim() && (
+          <Box
+            mt={2}
+            p={2}
+            sx={{
+              backgroundColor: "background.paper",
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Typography variant="subtitle2" color="primary" mb={1}>
+              Preview
+            </Typography>
+            {summary
+              .split("\n")
+              .filter((line) => line.trim())
+              .map((line, i) => (
+                <Typography key={i} variant="body2" sx={{ py: 0.3 }}>
+                  {line.trim().startsWith("-") || line.trim().startsWith("•")
+                    ? line.trim()
+                    : `• ${line.trim()}`}
+                </Typography>
+              ))}
+          </Box>
+        )}
+      </Box>
 
       {/* Add Driver Dialog */}
       <Dialog
