@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Typography,
@@ -24,31 +24,50 @@ import { Driver, initialDrivers } from "@/data/drivers";
 import DriverTable from "@/components/DriverTable";
 import PieChartCard from "@/components/PieChartCard";
 import StatsBar from "@/components/StatsBar";
+import WeeklyAttendance from "@/components/WeeklyAttendance";
 
 const STORAGE_KEY = "hos-dashboard-drivers";
-const WEEK_STORAGE_KEY = "hos-dashboard-week";
 const SUMMARY_STORAGE_KEY = "hos-dashboard-summary";
+
+/** Format a Date to YYYY-MM-DD using local timezone (avoids UTC drift) */
+function toLocalDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 function getDefaultWeek() {
   const today = new Date();
-  const day = today.getDay();
+  const dow = today.getDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - ((day + 6) % 7));
+  monday.setDate(today.getDate() - ((dow + 6) % 7));
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   return {
-    start: monday.toISOString().split("T")[0],
-    end: sunday.toISOString().split("T")[0],
+    start: toLocalDateStr(monday),
+    end: toLocalDateStr(sunday),
   };
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
+  const d = new Date(dateStr + "T12:00:00");
   return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+}
+
+function getWeekDates(start: string, end: string): string[] {
+  const dates: string[] = [];
+  const cur = new Date(start + "T12:00:00");
+  const last = new Date(end + "T12:00:00");
+  while (cur <= last) {
+    dates.push(toLocalDateStr(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return dates;
 }
 
 export default function Dashboard() {
@@ -61,15 +80,7 @@ export default function Dashboard() {
       return initialDrivers;
     }
   });
-  const [week, setWeek] = useState<{ start: string; end: string }>(() => {
-    if (typeof window === "undefined") return getDefaultWeek();
-    try {
-      const saved = localStorage.getItem(WEEK_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : getDefaultWeek();
-    } catch {
-      return getDefaultWeek();
-    }
-  });
+  const [week, setWeek] = useState<{ start: string; end: string }>(getDefaultWeek);
   const [summary, setSummary] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     try {
@@ -94,10 +105,6 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(drivers));
   }, [drivers]);
-
-  useEffect(() => {
-    localStorage.setItem(WEEK_STORAGE_KEY, JSON.stringify(week));
-  }, [week]);
 
   useEffect(() => {
     localStorage.setItem(SUMMARY_STORAGE_KEY, summary);
@@ -149,6 +156,21 @@ export default function Dashboard() {
     );
   };
 
+  const weekDates = useMemo(() => getWeekDates(week.start, week.end), [week]);
+
+  const toggleWorked = (driverId: number, date: string) => {
+    setDrivers((prev) =>
+      prev.map((d) => {
+        if (d.id !== driverId) return d;
+        const current = d.workedDays?.[date] ?? false;
+        return {
+          ...d,
+          workedDays: { ...d.workedDays, [date]: !current },
+        };
+      })
+    );
+  };
+
   const handleAddDriver = () => {
     if (newDriverName.trim() === "") return;
     const newId =
@@ -163,6 +185,7 @@ export default function Dashboard() {
         included: true,
         vehicleReason: "",
         planReason: "",
+        workedDays: {},
       },
     ]);
     setNewDriverName("");
@@ -356,7 +379,6 @@ export default function Dashboard() {
             startIcon={<RestartAltIcon />}
             onClick={() => {
               localStorage.removeItem(STORAGE_KEY);
-              localStorage.removeItem(WEEK_STORAGE_KEY);
               localStorage.removeItem(SUMMARY_STORAGE_KEY);
               setDrivers(initialDrivers);
               setWeek(getDefaultWeek());
@@ -383,6 +405,15 @@ export default function Dashboard() {
         onToggleIncluded={toggleIncluded}
         onUpdateReason={updateReason}
       />
+
+      {/* Weekly Attendance Grid */}
+      <Box mt={4}>
+        <WeeklyAttendance
+          drivers={drivers}
+          weekDates={weekDates}
+          onToggleWorked={toggleWorked}
+        />
+      </Box>
 
       {/* Add Driver Dialog */}
       <Dialog
