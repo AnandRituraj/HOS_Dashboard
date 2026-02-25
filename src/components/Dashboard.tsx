@@ -13,6 +13,8 @@ import {
   TextField,
   Grid,
   Chip,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -20,7 +22,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import { Driver, initialDrivers } from "@/data/drivers";
+import { Driver, initialDrivers, emptyDay } from "@/data/drivers";
 import DriverTable from "@/components/DriverTable";
 import PieChartCard from "@/components/PieChartCard";
 import StatsBar from "@/components/StatsBar";
@@ -29,7 +31,6 @@ import WeeklyAttendance from "@/components/WeeklyAttendance";
 const STORAGE_KEY = "hos-dashboard-drivers";
 const SUMMARY_STORAGE_KEY = "hos-dashboard-summary";
 
-/** Format a Date to YYYY-MM-DD using local timezone (avoids UTC drift) */
 function toLocalDateStr(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -70,6 +71,27 @@ function getWeekDates(start: string, end: string): string[] {
   return dates;
 }
 
+const DAY_NAMES: Record<number, string> = {
+  0: "Sun",
+  1: "Mon",
+  2: "Tue",
+  3: "Wed",
+  4: "Thu",
+  5: "Fri",
+  6: "Sat",
+};
+
+function getDayTabLabel(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  const dayName = DAY_NAMES[d.getDay()];
+  const month = d.toLocaleDateString("en-US", { month: "short" });
+  return `${dayName} ${month} ${d.getDate()}`;
+}
+
+function getTodayStr(): string {
+  return toLocalDateStr(new Date());
+}
+
 export default function Dashboard() {
   const [drivers, setDrivers] = useState<Driver[]>(() => {
     if (typeof window === "undefined") return initialDrivers;
@@ -101,7 +123,24 @@ export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newDriverName, setNewDriverName] = useState("");
 
-  // Persist to localStorage on every change
+  const weekDates = useMemo(() => getWeekDates(week.start, week.end), [week]);
+
+  // Default to today's tab if today is within the week, otherwise first day
+  const [selectedDayIdx, setSelectedDayIdx] = useState(() => {
+    const today = getTodayStr();
+    const dates = getWeekDates(getDefaultWeek().start, getDefaultWeek().end);
+    const idx = dates.indexOf(today);
+    return idx >= 0 ? idx : 0;
+  });
+
+  const selectedDate = weekDates[selectedDayIdx] || weekDates[0] || week.start;
+
+  useEffect(() => {
+    if (selectedDayIdx >= weekDates.length) {
+      setSelectedDayIdx(0);
+    }
+  }, [weekDates, selectedDayIdx]);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(drivers));
   }, [drivers]);
@@ -110,53 +149,71 @@ export default function Dashboard() {
     localStorage.setItem(SUMMARY_STORAGE_KEY, summary);
   }, [summary]);
 
-  const toggleVehicleAssigned = (id: number) => {
+  // --- Day-aware handlers ---
+
+  const getDriverDay = (driver: Driver, date: string) =>
+    driver.days?.[date] || emptyDay();
+
+  const toggleVehicleAssigned = (id: number, date: string) => {
     setDrivers((prev) =>
-      prev.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              vehicleAssigned: !d.vehicleAssigned,
-              vehicleReason: !d.vehicleAssigned ? "" : d.vehicleReason,
-            }
-          : d
-      )
+      prev.map((d) => {
+        if (d.id !== id) return d;
+        const day = getDriverDay(d, date);
+        return {
+          ...d,
+          days: {
+            ...d.days,
+            [date]: {
+              ...day,
+              vehicleAssigned: !day.vehicleAssigned,
+              vehicleReason: !day.vehicleAssigned ? "" : day.vehicleReason,
+            },
+          },
+        };
+      })
     );
   };
 
-  const toggleFollowedPlan = (id: number) => {
+  const toggleFollowedPlan = (id: number, date: string) => {
     setDrivers((prev) =>
-      prev.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              followedPlan: !d.followedPlan,
-              planReason: !d.followedPlan ? "" : d.planReason,
-            }
-          : d
-      )
-    );
-  };
-
-  const toggleIncluded = (id: number) => {
-    setDrivers((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, included: !d.included } : d
-      )
+      prev.map((d) => {
+        if (d.id !== id) return d;
+        const day = getDriverDay(d, date);
+        return {
+          ...d,
+          days: {
+            ...d.days,
+            [date]: {
+              ...day,
+              followedPlan: !day.followedPlan,
+              planReason: !day.followedPlan ? "" : day.planReason,
+            },
+          },
+        };
+      })
     );
   };
 
   const updateReason = (
     id: number,
+    date: string,
     field: "vehicleReason" | "planReason",
     value: string
   ) => {
     setDrivers((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, [field]: value } : d))
+      prev.map((d) => {
+        if (d.id !== id) return d;
+        const day = getDriverDay(d, date);
+        return {
+          ...d,
+          days: {
+            ...d.days,
+            [date]: { ...day, [field]: value },
+          },
+        };
+      })
     );
   };
-
-  const weekDates = useMemo(() => getWeekDates(week.start, week.end), [week]);
 
   const toggleWorked = (driverId: number, date: string) => {
     setDrivers((prev) =>
@@ -180,24 +237,29 @@ export default function Dashboard() {
       {
         id: newId,
         name: newDriverName.trim(),
-        vehicleAssigned: false,
-        followedPlan: false,
-        included: true,
-        vehicleReason: "",
-        planReason: "",
         workedDays: {},
+        days: {},
       },
     ]);
     setNewDriverName("");
     setDialogOpen(false);
   };
 
-  // Only count included drivers for stats and charts
-  const counted = drivers.filter((d) => d.included);
-  const vehicleYes = counted.filter((d) => d.vehicleAssigned).length;
-  const vehicleNo = counted.length - vehicleYes;
-  const planYes = counted.filter((d) => d.followedPlan).length;
-  const planNo = counted.length - planYes;
+  // --- Per-driver weekly compliance (Yes on all worked days = Yes for the week) ---
+  const getWorkedDates = (d: Driver) =>
+    weekDates.filter((date) => d.workedDays?.[date]);
+
+  const driversWhoWorked = drivers.filter(
+    (d) => getWorkedDates(d).length > 0
+  );
+  const vehicleYes = driversWhoWorked.filter((d) =>
+    getWorkedDates(d).every((date) => d.days?.[date]?.vehicleAssigned)
+  ).length;
+  const planYes = driversWhoWorked.filter((d) =>
+    getWorkedDates(d).every((date) => d.days?.[date]?.followedPlan)
+  ).length;
+  const vehicleNo = driversWhoWorked.length - vehicleYes;
+  const planNo = driversWhoWorked.length - planYes;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -253,16 +315,22 @@ export default function Dashboard() {
         </Box>
       </Box>
 
-      {/* Stats Bar */}
+      {/* Stats Bar (weekly aggregate) */}
       <Box mb={4}>
-        <StatsBar drivers={drivers} />
+        <StatsBar
+          drivers={drivers}
+          weekDates={weekDates}
+          driversWhoWorked={driversWhoWorked.length}
+          vehicleYes={vehicleYes}
+          planYes={planYes}
+        />
       </Box>
 
-      {/* Pie Charts */}
+      {/* Pie Charts (weekly aggregate) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <PieChartCard
-            title="Vehicle Assigned While Driving"
+            title="Vehicle Assigned"
             yesCount={vehicleYes}
             noCount={vehicleNo}
           />
@@ -278,7 +346,12 @@ export default function Dashboard() {
 
       {/* Management Summary */}
       <Box mb={4}>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1.5}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={1.5}
+        >
           <Box display="flex" alignItems="center" gap={1}>
             <SummarizeIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
@@ -310,8 +383,8 @@ export default function Dashboard() {
         {editingSummary ? (
           <>
             <Typography variant="body2" color="text.secondary" mb={1.5}>
-              Key points, suggestions, and takeaways for management review.
-              Use each line as a bullet point.
+              Key points, suggestions, and takeaways for management review. Use
+              each line as a bullet point.
             </Typography>
             <TextField
               fullWidth
@@ -319,7 +392,9 @@ export default function Dashboard() {
               minRows={4}
               maxRows={12}
               variant="outlined"
-              placeholder={"- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"}
+              placeholder={
+                "- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"
+              }
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               sx={{
@@ -357,7 +432,7 @@ export default function Dashboard() {
         )}
       </Box>
 
-      {/* Driver Table Header + Add Button */}
+      {/* Driver Table Header + Add/Reset */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -366,10 +441,10 @@ export default function Dashboard() {
       >
         <Box>
           <Typography variant="h5" fontWeight={600}>
-            Drivers
+            Daily Driver Tracking
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {counted.length} of {drivers.length} included in stats
+            {drivers.length} drivers &bull; Select a day tab below
           </Typography>
         </Box>
         <Box display="flex" gap={1}>
@@ -383,6 +458,8 @@ export default function Dashboard() {
               setDrivers(initialDrivers);
               setWeek(getDefaultWeek());
               setSummary("");
+              setEditingSummary(true);
+              setSelectedDayIdx(0);
             }}
           >
             Reset
@@ -397,12 +474,35 @@ export default function Dashboard() {
         </Box>
       </Box>
 
-      {/* Driver Table */}
+      {/* Day Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+        <Tabs
+          value={selectedDayIdx}
+          onChange={(_, newIdx) => setSelectedDayIdx(newIdx)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
+          {weekDates.map((date, idx) => (
+            <Tab
+              key={date}
+              label={getDayTabLabel(date)}
+              value={idx}
+              sx={{
+                fontWeight: date === getTodayStr() ? 700 : 400,
+                color: date === getTodayStr() ? "primary.main" : undefined,
+              }}
+            />
+          ))}
+        </Tabs>
+      </Box>
+
+      {/* Driver Table for selected day */}
       <DriverTable
-        drivers={[...drivers].sort((a, b) => Number(b.included) - Number(a.included))}
+        drivers={drivers}
+        selectedDate={selectedDate}
         onToggleVehicleAssigned={toggleVehicleAssigned}
         onToggleFollowedPlan={toggleFollowedPlan}
-        onToggleIncluded={toggleIncluded}
         onUpdateReason={updateReason}
       />
 

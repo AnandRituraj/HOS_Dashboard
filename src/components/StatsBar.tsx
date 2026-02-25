@@ -9,27 +9,38 @@ import { Driver } from "@/data/drivers";
 
 interface StatsBarProps {
   drivers: Driver[];
+  weekDates: string[];
+  driversWhoWorked: number;
+  vehicleYes: number;
+  planYes: number;
 }
 
-export default function StatsBar({ drivers }: StatsBarProps) {
-  const counted = drivers.filter((d) => d.included);
-  const total = counted.length;
-  const vehicleYes = counted.filter((d) => d.vehicleAssigned).length;
-  const planYes = counted.filter((d) => d.followedPlan).length;
+export default function StatsBar({
+  drivers,
+  weekDates,
+  driversWhoWorked,
+  vehicleYes,
+  planYes,
+}: StatsBarProps) {
+  const total = driversWhoWorked;
 
-  const vehiclePct = total > 0 ? ((vehicleYes / total) * 100).toFixed(1) : "0";
-  const planPct = total > 0 ? ((planYes / total) * 100).toFixed(1) : "0";
+  const vehiclePct =
+    total > 0 ? ((vehicleYes / total) * 100).toFixed(1) : "0";
+  const planPct =
+    total > 0 ? ((planYes / total) * 100).toFixed(1) : "0";
 
   const stats = [
     {
-      label: "Counted Drivers",
-      value: `${total} / ${drivers.length}`,
+      label: "Total Drivers",
+      value: `${drivers.length}`,
+      sub: `${total} worked this week`,
       icon: <PeopleIcon sx={{ fontSize: 36, color: "primary.main" }} />,
       color: "primary.main",
     },
     {
       label: "Vehicle Assigned",
       value: `${vehicleYes}/${total} (${vehiclePct}%)`,
+      sub: "all worked days",
       icon: (
         <DirectionsCarIcon sx={{ fontSize: 36, color: "success.main" }} />
       ),
@@ -38,6 +49,7 @@ export default function StatsBar({ drivers }: StatsBarProps) {
     {
       label: "Followed Plan",
       value: `${planYes}/${total} (${planPct}%)`,
+      sub: "all worked days",
       icon: (
         <AssignmentTurnedInIcon sx={{ fontSize: 36, color: "info.main" }} />
       ),
@@ -46,12 +58,7 @@ export default function StatsBar({ drivers }: StatsBarProps) {
   ];
 
   return (
-    <Box
-      display="flex"
-      gap={2}
-      flexWrap="wrap"
-      justifyContent="center"
-    >
+    <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
       {stats.map((stat) => (
         <Paper
           key={stat.label}
@@ -73,6 +80,9 @@ export default function StatsBar({ drivers }: StatsBarProps) {
             </Typography>
             <Typography variant="h6" fontWeight={700} color={stat.color}>
               {stat.value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {stat.sub}
             </Typography>
           </Box>
         </Paper>

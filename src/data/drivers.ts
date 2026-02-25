@@ -1,13 +1,25 @@
+export type DayEntry = {
+  vehicleAssigned: boolean;
+  followedPlan: boolean;
+  vehicleReason: string;
+  planReason: string;
+};
+
 export type Driver = {
   id: number;
   name: string;
-  vehicleAssigned: boolean;
-  followedPlan: boolean;
-  included: boolean;
-  vehicleReason: string;
-  planReason: string;
   workedDays: { [date: string]: boolean };
+  days: { [date: string]: DayEntry };
 };
+
+export function emptyDay(): DayEntry {
+  return {
+    vehicleAssigned: false,
+    followedPlan: false,
+    vehicleReason: "",
+    planReason: "",
+  };
+}
 
 export const driverNames = [
   "Ahamed Mohamed Faizal",
@@ -29,10 +41,6 @@ export const driverNames = [
 export const initialDrivers: Driver[] = driverNames.map((name, i) => ({
   id: i + 1,
   name,
-  vehicleAssigned: false,
-  followedPlan: false,
-  included: true,
-  vehicleReason: "",
-  planReason: "",
   workedDays: {},
+  days: {},
 }));

@@ -12,7 +12,6 @@ import {
   Switch,
   Chip,
   Typography,
-  Checkbox,
   IconButton,
   Tooltip,
   Dialog,
@@ -27,15 +26,16 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import CommentIcon from "@mui/icons-material/Comment";
-import { Driver } from "@/data/drivers";
+import { Driver, emptyDay } from "@/data/drivers";
 
 interface DriverTableProps {
   drivers: Driver[];
-  onToggleVehicleAssigned: (id: number) => void;
-  onToggleFollowedPlan: (id: number) => void;
-  onToggleIncluded: (id: number) => void;
+  selectedDate: string;
+  onToggleVehicleAssigned: (id: number, date: string) => void;
+  onToggleFollowedPlan: (id: number, date: string) => void;
   onUpdateReason: (
     id: number,
+    date: string,
     field: "vehicleReason" | "planReason",
     value: string
   ) => void;
@@ -43,9 +43,9 @@ interface DriverTableProps {
 
 export default function DriverTable({
   drivers,
+  selectedDate,
   onToggleVehicleAssigned,
   onToggleFollowedPlan,
-  onToggleIncluded,
   onUpdateReason,
 }: DriverTableProps) {
   const [reasonDialog, setReasonDialog] = useState<{
@@ -68,19 +68,27 @@ export default function DriverTable({
     driver: Driver,
     field: "vehicleReason" | "planReason"
   ) => {
+    const day = driver.days?.[selectedDate] || emptyDay();
     setReasonDialog({
       open: true,
       driverId: driver.id,
       field,
-      value: driver[field],
+      value: day[field],
       driverName: driver.name,
       fieldLabel:
-        field === "vehicleReason" ? "Vehicle Not Assigned" : "Didn't Follow Plan",
+        field === "vehicleReason"
+          ? "Vehicle Not Assigned"
+          : "Didn't Follow Plan",
     });
   };
 
   const saveReason = () => {
-    onUpdateReason(reasonDialog.driverId, reasonDialog.field, reasonDialog.value);
+    onUpdateReason(
+      reasonDialog.driverId,
+      selectedDate,
+      reasonDialog.field,
+      reasonDialog.value
+    );
     setReasonDialog((prev) => ({ ...prev, open: false }));
   };
 
@@ -89,165 +97,154 @@ export default function DriverTable({
       <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "#1565c0",
-              }}
-            >
-              <TableCell sx={{ color: "#fff", fontWeight: 700 }} align="center">
-                Count
-              </TableCell>
+            <TableRow sx={{ backgroundColor: "#1565c0" }}>
               <TableCell sx={{ color: "#fff", fontWeight: 700 }}>#</TableCell>
               <TableCell sx={{ color: "#fff", fontWeight: 700 }}>
                 Driver Name
               </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: 700 }} align="center">
+              <TableCell
+                sx={{ color: "#fff", fontWeight: 700 }}
+                align="center"
+              >
                 Vehicle Assigned
               </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: 700 }} align="center">
+              <TableCell
+                sx={{ color: "#fff", fontWeight: 700 }}
+                align="center"
+              >
                 Followed Plan
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {drivers.map((driver, index) => (
-              <TableRow
-                key={driver.id}
-                sx={{
-                  opacity: driver.included ? 1 : 0.5,
-                  "&:nth-of-type(odd)": { backgroundColor: "action.hover" },
-                  "&:hover": { backgroundColor: "action.selected" },
-                  transition: "all 0.2s",
-                }}
-              >
-                <TableCell align="center">
-                  <Tooltip
-                    title={
-                      driver.included
-                        ? "Included in stats — click to exclude"
-                        : "Excluded from stats — click to include"
-                    }
-                  >
-                    <Checkbox
-                      checked={driver.included}
-                      onChange={() => onToggleIncluded(driver.id)}
-                      size="small"
-                      color="primary"
-                    />
-                  </Tooltip>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={500}>
-                    {index + 1}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1" fontWeight={500}>
-                    {driver.name}
-                  </Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    gap={0.5}
-                  >
-                    <Switch
-                      checked={driver.vehicleAssigned}
-                      onChange={() => onToggleVehicleAssigned(driver.id)}
-                      color="primary"
-                      size="small"
-                    />
-                    <Chip
-                      icon={
-                        driver.vehicleAssigned ? (
-                          <CheckCircleIcon />
-                        ) : (
-                          <CancelIcon />
-                        )
-                      }
-                      label={driver.vehicleAssigned ? "Yes" : "No"}
-                      color={driver.vehicleAssigned ? "success" : "error"}
-                      size="small"
-                      variant="outlined"
-                    />
-                    {!driver.vehicleAssigned && (
-                      <Tooltip
-                        title={
-                          driver.vehicleReason
-                            ? driver.vehicleReason
-                            : "Add reason"
+            {drivers.map((driver, index) => {
+              const day = driver.days?.[selectedDate] || emptyDay();
+              return (
+                <TableRow
+                  key={driver.id}
+                  sx={{
+                    "&:nth-of-type(odd)": { backgroundColor: "action.hover" },
+                    "&:hover": { backgroundColor: "action.selected" },
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>
+                      {index + 1}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontWeight={500}>
+                      {driver.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      gap={0.5}
+                    >
+                      <Switch
+                        checked={day.vehicleAssigned}
+                        onChange={() =>
+                          onToggleVehicleAssigned(driver.id, selectedDate)
                         }
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            openReasonDialog(driver, "vehicleReason")
-                          }
-                          color={driver.vehicleReason ? "info" : "default"}
-                        >
-                          {driver.vehicleReason ? (
-                            <CommentIcon fontSize="small" />
+                        color="primary"
+                        size="small"
+                      />
+                      <Chip
+                        icon={
+                          day.vehicleAssigned ? (
+                            <CheckCircleIcon />
                           ) : (
-                            <EditNoteIcon fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    gap={0.5}
-                  >
-                    <Switch
-                      checked={driver.followedPlan}
-                      onChange={() => onToggleFollowedPlan(driver.id)}
-                      color="primary"
-                      size="small"
-                    />
-                    <Chip
-                      icon={
-                        driver.followedPlan ? (
-                          <CheckCircleIcon />
-                        ) : (
-                          <CancelIcon />
-                        )
-                      }
-                      label={driver.followedPlan ? "Yes" : "No"}
-                      color={driver.followedPlan ? "success" : "error"}
-                      size="small"
-                      variant="outlined"
-                    />
-                    {!driver.followedPlan && (
-                      <Tooltip
-                        title={
-                          driver.planReason ? driver.planReason : "Add reason"
+                            <CancelIcon />
+                          )
                         }
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            openReasonDialog(driver, "planReason")
+                        label={day.vehicleAssigned ? "Yes" : "No"}
+                        color={day.vehicleAssigned ? "success" : "error"}
+                        size="small"
+                        variant="outlined"
+                      />
+                      {!day.vehicleAssigned && (
+                        <Tooltip
+                          title={
+                            day.vehicleReason
+                              ? day.vehicleReason
+                              : "Add reason"
                           }
-                          color={driver.planReason ? "info" : "default"}
                         >
-                          {driver.planReason ? (
-                            <CommentIcon fontSize="small" />
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              openReasonDialog(driver, "vehicleReason")
+                            }
+                            color={day.vehicleReason ? "info" : "default"}
+                          >
+                            {day.vehicleReason ? (
+                              <CommentIcon fontSize="small" />
+                            ) : (
+                              <EditNoteIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      gap={0.5}
+                    >
+                      <Switch
+                        checked={day.followedPlan}
+                        onChange={() =>
+                          onToggleFollowedPlan(driver.id, selectedDate)
+                        }
+                        color="primary"
+                        size="small"
+                      />
+                      <Chip
+                        icon={
+                          day.followedPlan ? (
+                            <CheckCircleIcon />
                           ) : (
-                            <EditNoteIcon fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+                            <CancelIcon />
+                          )
+                        }
+                        label={day.followedPlan ? "Yes" : "No"}
+                        color={day.followedPlan ? "success" : "error"}
+                        size="small"
+                        variant="outlined"
+                      />
+                      {!day.followedPlan && (
+                        <Tooltip
+                          title={
+                            day.planReason ? day.planReason : "Add reason"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              openReasonDialog(driver, "planReason")
+                            }
+                            color={day.planReason ? "info" : "default"}
+                          >
+                            {day.planReason ? (
+                              <CommentIcon fontSize="small" />
+                            ) : (
+                              <EditNoteIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -259,12 +256,11 @@ export default function DriverTable({
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>
-          Reason — {reasonDialog.driverName}
-        </DialogTitle>
+        <DialogTitle>Reason — {reasonDialog.driverName}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" mb={2}>
-            Why did this driver not meet the &quot;{reasonDialog.fieldLabel}&quot; criteria?
+            Why did this driver not meet the &quot;{reasonDialog.fieldLabel}
+            &quot; criteria?
           </Typography>
           <TextField
             autoFocus
