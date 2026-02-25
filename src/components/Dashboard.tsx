@@ -133,13 +133,8 @@ export default function Dashboard() {
     return idx >= 0 ? idx : 0;
   });
 
-  const selectedDate = weekDates[selectedDayIdx] || weekDates[0] || week.start;
-
-  useEffect(() => {
-    if (selectedDayIdx >= weekDates.length) {
-      setSelectedDayIdx(0);
-    }
-  }, [weekDates, selectedDayIdx]);
+  const effectiveDayIdx = selectedDayIdx < weekDates.length ? selectedDayIdx : 0;
+  const selectedDate = weekDates[effectiveDayIdx] || week.start;
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(drivers));
@@ -477,7 +472,7 @@ export default function Dashboard() {
       {/* Day Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
         <Tabs
-          value={selectedDayIdx}
+          value={effectiveDayIdx}
           onChange={(_, newIdx) => setSelectedDayIdx(newIdx)}
           variant="scrollable"
           scrollButtons="auto"
