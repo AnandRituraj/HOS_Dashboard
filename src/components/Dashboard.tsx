@@ -21,7 +21,6 @@ export default function Dashboard() {
       <Box mb={4}>
         <StatsBar
           drivers={data.drivers}
-          weekDates={data.weekDates}
           driversWhoWorked={data.driversWhoWorkedCount}
           vehicleYes={data.vehicleYes}
           planYes={data.planYes}

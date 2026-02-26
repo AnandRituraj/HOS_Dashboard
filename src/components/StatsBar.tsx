@@ -9,7 +9,6 @@ import { Driver } from "@/data/drivers";
 
 interface StatsBarProps {
   drivers: Driver[];
-  weekDates: string[];
   driversWhoWorked: number;
   vehicleYes: number;
   planYes: number;
@@ -17,7 +16,6 @@ interface StatsBarProps {
 
 export default function StatsBar({
   drivers,
-  weekDates,
   driversWhoWorked,
   vehicleYes,
   planYes,
