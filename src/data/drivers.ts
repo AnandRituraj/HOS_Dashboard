@@ -23,7 +23,6 @@ export function emptyDay(): DayEntry {
 
 export const driverNames = [
   "Ahamed Mohamed Faizal",
-  "Antoine R",
   "Brinder Singh",
   "David Arden",
   "Deepak NFN",
@@ -31,11 +30,12 @@ export const driverNames = [
   "Dinero",
   "Eric",
   "Hector Joel Batista",
-  "Heideckel Toribo (Oscar)",
-  "James Austin",
-  "Michael Hill",
-  "Nunez Robert",
-  "Winder Joshua James Jr",
+  "Heideckel Toribo ( Oscar)",
+  "Michael",
+  "NUNEZ ROBERT",
+  "Ramon Sierra",
+  "Raymond Rodriguez",
+  "Winder Joshua James, JR",
 ];
 
 export const initialDrivers: Driver[] = driverNames.map((name, i) => ({
