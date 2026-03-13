@@ -1,70 +1,80 @@
 # HOS Dashboard
 
-Weekly driver HOS compliance dashboard built with Next.js, React, Material UI, and Recharts.
+Driver compliance dashboard built with Next.js, Material UI, and Recharts. Frontend-only -- no backend or database.
 
-The app is fully client-side. It tracks which drivers worked on each day of a selected week, whether they had a vehicle assigned, whether they followed the plan, and any reasons for non-compliance. All data is persisted in the browser with `localStorage`.
-
-## Current Features
-
-- Weekly date range selector with day tabs
-- Daily driver compliance tracking
-- Weekly attendance grid
-- Weekly compliance rollups and pie charts
-- Management summary notes
-- Per-driver reason capture for failed checks
-- Add driver dialog
-- Reset to seeded driver list
-- Persistent browser storage with no backend
+Track driver attendance and daily compliance throughout the week, then present weekly stakeholder rollups with pie charts and summary stats.
 
 ## Tech Stack
 
-- Next.js 16 App Router
-- React 19
-- Material UI 7
-- Recharts 3
-- TypeScript
+- **Next.js 16** (App Router, TypeScript)
+- **React 19**
+- **Material UI 7** (`@mui/material`, `@mui/icons-material`, Emotion)
+- **Recharts 3** (pie charts)
+- **Dark mode** theme
 
-## How The App Works
+## Features
 
-### Data Model
+- **Day tabs** -- Switch between days of the week to track each driver's compliance for that day
+- **Vehicle Assigned toggle** -- Yes/No per driver per day
+- **Followed Plan toggle** -- Yes/No per driver per day
+- **Reason capture** -- When a driver has "No", click the note icon to record why
+- **Weekly attendance grid** -- Checkbox matrix (driver x day) to mark who worked each day, with a total column
+- **Weekly pie charts** -- Per-driver rollup showing how many drivers were fully compliant across all their worked days
+- **Stats cards** -- Total drivers, vehicle assigned compliance %, followed plan compliance %
+- **Management summary** -- Type bullet points for stakeholders, save to preview, click to edit again
+- **Add Driver** -- Dialog to add new drivers on the fly
+- **Reset** -- Clears all saved data and restores the seeded driver list
+- **Data persistence** -- All data saved to `localStorage`, survives page refreshes
+- **Responsive layout** -- Charts stack on mobile, sit side-by-side on desktop
 
-Each driver is defined in `src/data/drivers.ts` with:
+## How Weekly Stats Work
 
-- `id`
-- `name`
-- `workedDays[date]`: whether the driver worked on that date
-- `days[date]`: compliance details for that date
+The pie charts and stats cards show **per-driver weekly compliance**, not per-day-entry counts.
 
-Each daily compliance entry contains:
+For each driver:
 
-- `vehicleAssigned`
-- `followedPlan`
-- `vehicleReason`
-- `planReason`
+1. If they have **zero worked days** checked in the attendance grid, they are **excluded** from the weekly stats entirely.
+2. If they worked, `Vehicle Assigned = Yes (week)` only if `vehicleAssigned === true` on **every day they worked**.
+3. Same logic for `Followed Plan`.
 
-The seeded driver roster currently comes from a hardcoded name list in `src/data/drivers.ts`. The top-level `Driver List.csv` appears to be a reference file only and is not loaded by the application at runtime.
+This means: "10/12 (83.3%)" = 10 out of 12 drivers who worked that week had vehicle assigned on every single day they worked.
 
-### State And Persistence
+## Data Model
 
-The main state logic lives in `src/hooks/useDashboardData.ts`.
+Defined in `src/data/drivers.ts`:
 
-- Driver data is stored in `localStorage` under `hos-dashboard-drivers`
-- Management summary text is stored in `localStorage` under `hos-dashboard-summary`
-- The selected week defaults to the current Monday through Sunday
-- The selected day defaults to today when it falls inside the default week
+```typescript
+type Driver = {
+  id: number;
+  name: string;
+  workedDays: { [date: string]: boolean };
+  days: { [date: string]: DayEntry };
+};
 
-### Compliance Calculation
+type DayEntry = {
+  vehicleAssigned: boolean;
+  followedPlan: boolean;
+  vehicleReason: string;
+  planReason: string;
+};
+```
 
-Weekly rollups only count drivers who worked at least one day in the selected date range.
+The seeded roster (14 drivers) is defined in `driverNames` in the same file.
 
-- `Vehicle Assigned = Yes` only if the driver had `vehicleAssigned === true` on every worked day in the selected week
-- `Followed Plan = Yes` only if the driver had `followedPlan === true` on every worked day in the selected week
+## Persistence
 
-This means the stats and pie charts are weekly all-or-nothing rollups per worked driver, not per-day totals.
+Browser `localStorage` keys:
 
-## UI Structure
+| Key | Contents |
+|-----|----------|
+| `hos-dashboard-drivers` | Driver list, attendance, daily compliance, reasons |
+| `hos-dashboard-summary` | Management summary text |
 
-The home page dynamically loads the dashboard client-side because the app depends on browser storage.
+- Data persists across page refreshes on the same browser.
+- Data does **not** sync across different devices or browsers.
+- The selected week always defaults to the current Monday-Sunday on page load (not saved).
+
+## Project Structure
 
 ```text
 src/
@@ -92,25 +102,31 @@ src/
     └── dateUtils.ts
 ```
 
-### Component Responsibilities
+### Module Responsibilities
 
-- `src/app/page.tsx`: dynamically imports the dashboard with `ssr: false`
-- `src/components/Dashboard.tsx`: assembles the full screen
-- `src/components/DashboardHeader.tsx`: week picker and title
-- `src/components/StatsBar.tsx`: weekly summary cards
-- `src/components/PieChartCard.tsx`: chart cards for weekly yes/no rollups
-- `src/components/ManagementSummary.tsx`: editable management notes
-- `src/components/DashboardDailySection.tsx`: day tabs and daily tracking controls
-- `src/components/DriverTable.tsx`: per-driver daily compliance editing and reason dialog
-- `src/components/WeeklyAttendance.tsx`: attendance matrix for the selected week
-- `src/components/AddDriverDialog.tsx`: add-driver modal
+| Module | Purpose |
+|--------|---------|
+| `hooks/useDashboardData.ts` | All state, event handlers, localStorage persistence, weekly compliance calculations |
+| `components/Dashboard.tsx` | Top-level composition -- wires hook data to child components |
+| `components/DashboardHeader.tsx` | Title, subtitle, week date range picker |
+| `components/DashboardDailySection.tsx` | Day tabs, Reset/Add Driver buttons, renders DriverTable |
+| `components/DriverTable.tsx` | Per-driver daily compliance toggles and reason dialog |
+| `components/WeeklyAttendance.tsx` | Attendance checkbox matrix (driver x day) with totals |
+| `components/StatsBar.tsx` | Weekly summary stat cards |
+| `components/PieChartCard.tsx` | Recharts pie chart in MUI Card |
+| `components/ManagementSummary.tsx` | Editable summary with save/edit/preview workflow |
+| `components/AddDriverDialog.tsx` | MUI Dialog to add a new driver |
+| `components/ThemeRegistry.tsx` | MUI dark theme + Emotion cache for Next.js App Router |
+| `lib/dateUtils.ts` | Date helpers (local date formatting, week calculation, day labels) |
+| `lib/constants.ts` | localStorage key constants |
+| `data/drivers.ts` | Driver/DayEntry types, seeded driver names, `emptyDay()` factory |
 
-## Local Development
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18 or newer
-- npm 9 or newer
+- Node.js 18+
+- npm 9+
 
 ### Install
 
@@ -118,13 +134,20 @@ src/
 npm install
 ```
 
-### Run
+### Run locally
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000).
+
+### Build for production
+
+```bash
+npm run build
+npm start
+```
 
 ### Lint
 
@@ -132,24 +155,29 @@ Open `http://localhost:3000`.
 npm run lint
 ```
 
-### Production Build
+## Update Driver Names
+
+Edit the `driverNames` array in `src/data/drivers.ts`, then click **Reset** in the dashboard to clear old `localStorage` data and load the updated roster.
+
+## Deploy (Vercel)
+
+- Framework preset: **Next.js**
+- Root directory: leave default (repository root)
+- Build command: `npm run build` (default)
+- Install command: `npm install` (default)
+
+No backend configuration needed.
+
+## Push to GitHub
 
 ```bash
-npm run build
-npm start
+git add .
+git commit -m "update hos dashboard"
+git push origin master
 ```
 
-## Notes And Limitations
+## Limitations
 
-- There is no backend, authentication, or shared persistence
-- Data is scoped to the current browser profile via `localStorage`
-- The selected date range is user-editable and is not restricted to exact Monday-Sunday weeks
-- There are currently no automated tests in the repository
-
-## Deployment
-
-This project can be deployed as a standard Next.js app on Vercel or any platform that supports Next.js. Since the dashboard relies on browser storage and does not use server APIs, deployment is straightforward.
-
-## License
-
-For internal/demo use.
+- No backend, authentication, or database
+- No cross-device data sync (`localStorage` only)
+- No automated tests
