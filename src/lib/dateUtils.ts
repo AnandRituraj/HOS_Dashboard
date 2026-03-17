@@ -58,3 +58,25 @@ export function getDayTabLabel(dateStr: string): string {
 export function getTodayStr(): string {
   return toLocalDateStr(new Date());
 }
+
+export function getWeekForDate(dateStr: string): { start: string; end: string } {
+  const d = new Date(dateStr + "T12:00:00");
+  const dow = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - ((dow + 6) % 7));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return { start: toLocalDateStr(monday), end: toLocalDateStr(sunday) };
+}
+
+export function shiftWeek(
+  week: { start: string; end: string },
+  direction: 1 | -1
+): { start: string; end: string } {
+  const start = new Date(week.start + "T12:00:00");
+  const end = new Date(week.end + "T12:00:00");
+  const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+  start.setDate(start.getDate() + direction * days);
+  end.setDate(end.getDate() + direction * days);
+  return { start: toLocalDateStr(start), end: toLocalDateStr(end) };
+}
