@@ -26,7 +26,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import CommentIcon from "@mui/icons-material/Comment";
-import { Driver, emptyDay } from "@/data/drivers";
+import { Driver, emptyDay } from "@/types";
 
 interface DriverTableProps {
   drivers: Driver[];
@@ -249,7 +249,6 @@ export default function DriverTable({
         </Table>
       </TableContainer>
 
-      {/* Reason Dialog */}
       <Dialog
         open={reasonDialog.open}
         onClose={() => setReasonDialog((prev) => ({ ...prev, open: false }))}

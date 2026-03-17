@@ -5,7 +5,7 @@ import { Paper, Typography, Box } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import { Driver } from "@/data/drivers";
+import { Driver } from "@/types";
 
 interface StatsBarProps {
   drivers: Driver[];

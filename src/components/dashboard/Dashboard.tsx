@@ -5,14 +5,14 @@ import { Container, Box, Grid, CircularProgress } from "@mui/material";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import DashboardHeader from "@/components/DashboardHeader";
-import StatsBar from "@/components/StatsBar";
-import PieChartCard from "@/components/PieChartCard";
-import ManagementSummary from "@/components/ManagementSummary";
-import DashboardDailySection from "@/components/DashboardDailySection";
-import WeeklyAttendance from "@/components/WeeklyAttendance";
-import AddDriverDialog from "@/components/AddDriverDialog";
-import LoginPage from "@/components/LoginPage";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import StatsBar from "@/components/dashboard/StatsBar";
+import PieChartCard from "@/components/dashboard/PieChartCard";
+import ManagementSummary from "@/components/dashboard/ManagementSummary";
+import DashboardDailySection from "@/components/dashboard/DashboardDailySection";
+import WeeklyAttendance from "@/components/dashboard/WeeklyAttendance";
+import AddDriverDialog from "@/components/dashboard/AddDriverDialog";
+import LoginPage from "@/components/auth/LoginPage";
 
 export default function Dashboard() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -30,7 +30,6 @@ export default function Dashboard() {
     await supabase.auth.signOut();
   };
 
-  // Still determining auth state
   if (session === undefined) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">

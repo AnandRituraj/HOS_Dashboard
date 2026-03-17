@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { Box, CircularProgress } from "@mui/material";
 
-const Dashboard = dynamic(() => import("@/components/Dashboard"), {
+const Dashboard = dynamic(() => import("@/components/dashboard/Dashboard"), {
   ssr: false,
   loading: () => (
     <Box

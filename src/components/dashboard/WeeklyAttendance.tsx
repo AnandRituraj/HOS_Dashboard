@@ -15,7 +15,7 @@ import {
   Chip,
 } from "@mui/material";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import { Driver } from "@/data/drivers";
+import { Driver } from "@/types";
 
 interface WeeklyAttendanceProps {
   drivers: Driver[];

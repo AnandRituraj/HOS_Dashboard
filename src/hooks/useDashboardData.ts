@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Driver, emptyDay } from "@/data/drivers";
+import { Driver, emptyDay } from "@/types";
 import { getDefaultWeek, getWeekDates, getTodayStr } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabase";
 

@@ -4,9 +4,9 @@ import React from "react";
 import { Box, Typography, Button, Tabs, Tab } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { Driver } from "@/data/drivers";
+import { Driver } from "@/types";
 import { getDayTabLabel, getTodayStr } from "@/lib/dateUtils";
-import DriverTable from "@/components/DriverTable";
+import DriverTable from "@/components/dashboard/DriverTable";
 
 interface DashboardDailySectionProps {
   drivers: Driver[];
