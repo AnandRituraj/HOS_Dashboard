@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
-import { Container, Box, Grid } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Container, Box, Grid, CircularProgress } from "@mui/material";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsBar from "@/components/StatsBar";
@@ -10,13 +12,52 @@ import ManagementSummary from "@/components/ManagementSummary";
 import DashboardDailySection from "@/components/DashboardDailySection";
 import WeeklyAttendance from "@/components/WeeklyAttendance";
 import AddDriverDialog from "@/components/AddDriverDialog";
+import LoginPage from "@/components/LoginPage";
 
 export default function Dashboard() {
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
   const data = useDashboardData();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: s } }) => setSession(s));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  // Still determining auth state
+  if (session === undefined) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!session) {
+    return <LoginPage />;
+  }
+
+  if (data.loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <DashboardHeader week={data.week} onWeekChange={data.setWeek} />
+      <DashboardHeader
+        week={data.week}
+        onWeekChange={data.setWeek}
+        onLogout={handleLogout}
+      />
 
       <Box mb={4}>
         <StatsBar

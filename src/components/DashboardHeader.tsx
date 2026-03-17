@@ -1,18 +1,29 @@
 "use client";
 
 import React from "react";
-import { Typography, Box, Chip, TextField } from "@mui/material";
+import { Typography, Box, Chip, TextField, Button } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { formatDate } from "@/lib/dateUtils";
 
 interface DashboardHeaderProps {
   week: { start: string; end: string };
   onWeekChange: (week: { start: string; end: string }) => void;
+  onLogout: () => void;
 }
 
-export default function DashboardHeader({ week, onWeekChange }: DashboardHeaderProps) {
+export default function DashboardHeader({ week, onWeekChange, onLogout }: DashboardHeaderProps) {
   return (
-    <Box mb={4} textAlign="center">
+    <Box mb={4} textAlign="center" position="relative">
+      <Button
+        onClick={onLogout}
+        startIcon={<LogoutIcon />}
+        size="small"
+        color="inherit"
+        sx={{ position: "absolute", top: 0, right: 0, opacity: 0.6 }}
+      >
+        Sign out
+      </Button>
       <Typography variant="h3" fontWeight={700} color="primary.main">
         HOS Dashboard
       </Typography>
