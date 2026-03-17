@@ -312,13 +312,6 @@ export function useDashboardData() {
       .upsert({ week_start: week.start, text }, { onConflict: "week_start" });
   };
 
-  const handleReset = async () => {
-    await supabase.from("driver_days").delete().neq("driver_id", 0);
-    await supabase.from("summaries").delete().neq("week_start", "");
-    setWeek(getDefaultWeek());
-    setSelectedDayIdx(0);
-    setRefreshKey((k) => k + 1);
-  };
 
   const getWorkedDates = (d: Driver) =>
     weekDates.filter((date) => d.workedDays?.[date]);
@@ -357,7 +350,6 @@ export function useDashboardData() {
     updateReason,
     toggleWorked,
     handleAddDriver,
-    handleReset,
     driversWhoWorkedCount: driversWhoWorked.length,
     vehicleYes,
     planYes,

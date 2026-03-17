@@ -98,7 +98,6 @@ export default function Dashboard() {
         selectedDayIdx={data.selectedDayIdx}
         setSelectedDayIdx={data.setSelectedDayIdx}
         selectedDate={data.selectedDate}
-        onReset={data.handleReset}
         onAddDriverClick={() => data.setDialogOpen(true)}
         onToggleVehicleAssigned={data.toggleVehicleAssigned}
         onToggleFollowedPlan={data.toggleFollowedPlan}

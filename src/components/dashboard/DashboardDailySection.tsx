@@ -3,7 +3,6 @@
 import React from "react";
 import { Box, Typography, Button, Tabs, Tab } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { Driver } from "@/types";
 import { getDayTabLabel, getTodayStr } from "@/lib/dateUtils";
 import DriverTable from "@/components/dashboard/DriverTable";
@@ -15,7 +14,6 @@ interface DashboardDailySectionProps {
   selectedDayIdx: number;
   setSelectedDayIdx: (idx: number) => void;
   selectedDate: string;
-  onReset: () => void;
   onAddDriverClick: () => void;
   onToggleVehicleAssigned: (id: number, date: string) => void;
   onToggleFollowedPlan: (id: number, date: string) => void;
@@ -34,7 +32,6 @@ export default function DashboardDailySection({
   selectedDayIdx,
   setSelectedDayIdx,
   selectedDate,
-  onReset,
   onAddDriverClick,
   onToggleVehicleAssigned,
   onToggleFollowedPlan,
@@ -57,14 +54,6 @@ export default function DashboardDailySection({
           </Typography>
         </Box>
         <Box display="flex" gap={1}>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<RestartAltIcon />}
-            onClick={onReset}
-          >
-            Reset
-          </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
