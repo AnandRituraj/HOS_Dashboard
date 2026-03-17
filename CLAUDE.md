@@ -37,19 +37,20 @@ page.tsx (dynamic import, SSR: false)
 **Key files:**
 - `src/hooks/useDashboardData.ts` — Master hook: all state, handlers, Supabase UPSERT/DELETE, real-time subscriptions, weekly stats computation
 - `src/types/index.ts` — TypeScript types (`Driver`, `DayEntry`), `emptyDay()` factory
-- `src/lib/dateUtils.ts` — Week range logic (Monday–Sunday), date formatting helpers
+- `src/lib/dateUtils.ts` — Week range logic (Monday–Sunday), date formatting, `shiftWeek`, `getWeekForDate`, `getDayTabLabel`, `getTodayStr`
 - `src/lib/supabase.ts` — Supabase client (reads from `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `src/components/ThemeRegistry.tsx` — MUI dark theme + Emotion SSR cache
 - `src/components/auth/LoginPage.tsx` — Supabase email/password login UI
+- `src/components/dashboard/` — All dashboard UI components
 
 ## Supabase Database Schema
 
-**`drivers`** — `id` (int PK), `name` (string)
+**`drivers`** — `id` (int4 PK), `name` (text)
 
-**`driver_days`** — `driver_id` (int FK), `date` (YYYY-MM-DD), `worked` (bool), `vehicle_assigned` (bool), `followed_plan` (bool), `vehicle_reason` (string), `plan_reason` (string)
+**`driver_days`** — `id` (int4 PK), `driver_id` (int4 FK → drivers.id), `date` (text, YYYY-MM-DD), `worked` (bool), `vehicle_assigned` (bool), `followed_plan` (bool), `vehicle_reason` (text), `plan_reason` (text)
 - Unique constraint: `(driver_id, date)` — all writes use `.upsert(..., { onConflict: "driver_id,date" })`
 
-**`summaries`** — `week_start` (YYYY-MM-DD PK), `text` (string)
+**`summaries`** — `week_start` (text PK, YYYY-MM-DD), `text` (text)
 - Upsert conflict key: `week_start`
 
 ## Important Logic
@@ -64,11 +65,9 @@ page.tsx (dynamic import, SSR: false)
 - `realtime_drivers` — INSERT only → appends new driver to state
 - `realtime_summaries` — INSERT/UPDATE → updates `summary` if `week_start` matches current week
 
-**Data loading** — single `useEffect` keyed on `refreshKey` (incremented by `handleReset`):
-- Fetches all `drivers` + all `driver_days` in parallel
-- `rowsToDrivers()` helper hydrates flat DB rows into nested `Driver[]` shape
-
-**`handleReset`** — deletes ALL `driver_days` and ALL `summaries`, resets week to current, bumps `refreshKey`
+**Data loading** — two `useEffect` hooks that run on mount:
+- One fetches all `drivers` + all `driver_days` in parallel (keyed on `refreshKey`, but `refreshKey` is never incremented — loads once per mount); `rowsToDrivers()` hydrates flat rows into nested `Driver[]` shape
+- A second separate effect fetches the `summaries` row for the current week; re-runs on `week.start` change
 
 **Week state**: Not persisted — resets to current Monday on load. `selectedDayIdx` defaults to today's index in the week.
 
@@ -76,7 +75,7 @@ page.tsx (dynamic import, SSR: false)
 
 ## Tech Stack
 
-- **Next.js 15** (App Router), **React 19**, **TypeScript**
+- **Next.js 16** (App Router), **React 19**, **TypeScript**
 - **Material UI 7** — dark mode (`palette.mode: "dark"`, primary: `#90caf9`)
 - **Recharts 3** — pie charts
 - **Supabase JS 2** — database, auth, real-time

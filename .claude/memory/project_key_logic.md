@@ -17,12 +17,9 @@ Toggling a compliance field to `true` clears the associated reason field (vehicl
 - `realtime_summaries` — all events on summaries (filtered to current week_start in handler)
 
 ## Data loading
-- Single useEffect keyed on `refreshKey` (int, bumped by handleReset)
+- Single useEffect keyed on `refreshKey` (int, never incremented — loads once per mount)
 - Loads all drivers + all driver_days in parallel
 - `rowsToDrivers()` converts flat DB rows → nested Driver[] shape
-
-## handleReset
-Deletes ALL driver_days and ALL summaries (not week-scoped), resets week to current Monday, bumps refreshKey to trigger reload.
 
 ## Week state
 - Not persisted anywhere — always resets to current Monday on page load
