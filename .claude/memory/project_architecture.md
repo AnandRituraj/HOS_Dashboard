@@ -10,7 +10,7 @@ Driver compliance tracking dashboard. Fleet management tool tracking vehicle ass
 **How to apply:** Always assume Supabase as the data layer — no localStorage involved in the current codebase.
 
 ## Stack
-- Next.js 15 (App Router), React 19, TypeScript
+- Next.js 16 (App Router), React 19, TypeScript
 - Material UI 7 (dark theme, primary: #90caf9)
 - Recharts 3 (pie charts)
 - Supabase JS 2 (DB + auth + real-time)
