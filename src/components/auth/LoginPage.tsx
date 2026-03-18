@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Card,
@@ -19,8 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     setError("");
     setLoading(true);
     const { error: authError } = await supabase.auth.signInWithPassword({
@@ -65,7 +64,7 @@ export default function LoginPage() {
             </Typography>
           </Box>
 
-          <Box component="form" onSubmit={handleLogin} display="flex" flexDirection="column" gap={2}>
+          <Box component="form" onSubmit={(e) => { e.preventDefault(); handleLogin(); }} display="flex" flexDirection="column" gap={2}>
             <TextField
               label="Email"
               type="email"

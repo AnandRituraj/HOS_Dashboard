@@ -66,7 +66,7 @@ page.tsx (dynamic import, SSR: false)
 - `realtime_summaries` — INSERT/UPDATE → updates `summary` if `week_start` matches current week
 
 **Data loading** — two `useEffect` hooks that run on mount:
-- One fetches all `drivers` + all `driver_days` in parallel (keyed on `refreshKey`, but `refreshKey` is never incremented — loads once per mount); `rowsToDrivers()` hydrates flat rows into nested `Driver[]` shape
+- One fetches all `drivers` + all `driver_days` in parallel (empty dependency array — loads once per mount); `rowsToDrivers()` hydrates flat rows into nested `Driver[]` shape
 - A second separate effect fetches the `summaries` row for the current week; re-runs on `week.start` change
 
 **Week state**: Not persisted — resets to current Monday on load. `selectedDayIdx` defaults to today's index in the week.

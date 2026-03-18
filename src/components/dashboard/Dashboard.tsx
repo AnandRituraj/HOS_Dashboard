@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Box, Grid, CircularProgress } from "@mui/material";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
