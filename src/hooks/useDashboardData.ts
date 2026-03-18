@@ -311,7 +311,6 @@ export function useDashboardData() {
       .upsert({ week_start: week.start, text }, { onConflict: "week_start" });
   };
 
-
   const getWorkedDates = (d: Driver) =>
     weekDates.filter((date) => d.workedDays?.[date]);
 
