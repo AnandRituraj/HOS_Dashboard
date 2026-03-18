@@ -40,7 +40,6 @@ function rowsToDrivers(
 export function useDashboardData() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [week, setWeek] = useState<{ start: string; end: string }>(getDefaultWeek);
   const [summary, setSummary] = useState<string>("");
   const [editingSummary, setEditingSummary] = useState(true);
@@ -75,7 +74,7 @@ export function useDashboardData() {
     }
     load();
     return () => { cancelled = true; };
-  }, [refreshKey]);
+  }, []);
 
   // Load summary for the selected week (re-runs on week change)
   useEffect(() => {
@@ -92,7 +91,7 @@ export function useDashboardData() {
     }
     loadSummary();
     return () => { cancelled = true; };
-  }, [week.start, refreshKey]);
+  }, [week.start]);
 
   // Real-time: driver_days changes
   useEffect(() => {
@@ -128,8 +127,8 @@ export function useDashboardData() {
             setDrivers((prev) =>
               prev.map((d) => {
                 if (d.id !== row.driver_id) return d;
-                const { [row.date!]: _w, ...workedDays } = d.workedDays ?? {};
-                const { [row.date!]: _d, ...days } = d.days ?? {};
+                const { [row.date!]: _workedDay, ...workedDays } = d.workedDays ?? {};
+                const { [row.date!]: _dayEntry, ...days } = d.days ?? {};
                 return { ...d, workedDays, days };
               })
             );
