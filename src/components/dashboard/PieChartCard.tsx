@@ -17,7 +17,7 @@ interface PieChartCardProps {
   noCount: number;
 }
 
-const COLORS = ["#66bb6a", "#ef5350"];
+const COLORS = ["#22c55e", "#ef4444"];
 
 const renderCustomLabel = (props: {
   cx?: number;
@@ -107,16 +107,17 @@ export default function PieChartCard({
                     ];
                   }}
                   contentStyle={{
-                    backgroundColor: "#2a2a2a",
-                    border: "1px solid #444",
+                    backgroundColor: "#1a1a1a",
+                    border: "1px solid #2a2a2a",
                     borderRadius: 8,
-                    color: "#fff",
+                    color: "#f5f5f5",
+                    fontSize: "0.8rem",
                   }}
-                  itemStyle={{ color: "#fff" }}
-                  labelStyle={{ color: "#ccc" }}
+                  itemStyle={{ color: "#f5f5f5" }}
+                  labelStyle={{ color: "#888" }}
                 />
                 <Legend
-                  wrapperStyle={{ color: "#ccc" }}
+                  wrapperStyle={{ color: "#888", fontSize: "0.82rem" }}
                 />
               </PieChart>
             </ResponsiveContainer>

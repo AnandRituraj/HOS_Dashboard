@@ -6,7 +6,8 @@ Driver compliance tracking dashboard for fleet management. Tracks daily vehicle 
 
 - **Next.js 16** (App Router, TypeScript)
 - **React 19**
-- **Material UI 7** (`@mui/material`, `@mui/icons-material`, Emotion) — dark mode
+- **Material UI 7** (`@mui/material`, `@mui/icons-material`, Emotion) — Linear-inspired dark theme
+- **Inter** (via `next/font/google`) — loaded in `layout.tsx`
 - **Recharts 3** (pie charts)
 - **Supabase JS 2** (database, auth, real-time)
 
@@ -111,7 +112,7 @@ src/
 | `components/dashboard/PieChartCard.tsx` | Recharts pie chart wrapped in MUI Card |
 | `components/dashboard/ManagementSummary.tsx` | Editable weekly notes with edit and view modes |
 | `components/dashboard/AddDriverDialog.tsx` | MUI Dialog to add a new driver |
-| `components/ThemeRegistry.tsx` | MUI dark theme + Emotion cache for Next.js App Router |
+| `components/ThemeRegistry.tsx` | Linear-inspired dark theme (single indigo accent, near-black bg) + Emotion cache for Next.js App Router |
 | `components/auth/LoginPage.tsx` | Supabase email/password login form |
 | `lib/dateUtils.ts` | Week range logic (Monday–Sunday), date formatting, shift/jump helpers |
 | `lib/supabase.ts` | Supabase client (reads `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) |

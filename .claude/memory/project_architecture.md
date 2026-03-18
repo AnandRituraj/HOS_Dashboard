@@ -11,10 +11,18 @@ Driver compliance tracking dashboard. Fleet management tool tracking vehicle ass
 
 ## Stack
 - Next.js 16 (App Router), React 19, TypeScript
-- Material UI 7 (dark theme, primary: #90caf9)
+- Material UI 7 — Linear-inspired dark theme (primary: `#5E6AD2`, bg: `#0a0a0a`, paper: `#111111`, borders: `#1e1e1e`)
+- Inter font via `next/font/google`, applied in `layout.tsx`
 - Recharts 3 (pie charts)
 - Supabase JS 2 (DB + auth + real-time)
 - Path alias: `@/*` → `src/*`
+
+## Design system (ThemeRegistry.tsx)
+- Single accent: `#5E6AD2` (Linear indigo) — interactive elements only
+- Semantic: success `#22c55e`, error `#ef4444`, warning `#f59e0b`, info `#3b82f6`
+- Table heads: `MuiTableCell.head` override — `#0d0d0d` bg, uppercase gray labels, no colored header rows
+- StatsBar: Linear-style KPI cards — uppercase label → big number (color-coded by threshold) → sub-text
+- No decorative gradients, no glow effects, no alternating row stripes
 
 ## Component tree
 ```

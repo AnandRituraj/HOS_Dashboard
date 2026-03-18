@@ -76,7 +76,18 @@ page.tsx (dynamic import, SSR: false)
 ## Tech Stack
 
 - **Next.js 16** (App Router), **React 19**, **TypeScript**
-- **Material UI 7** — dark mode (`palette.mode: "dark"`, primary: `#90caf9`)
+- **Material UI 7** — dark mode, Linear-inspired design system (primary: `#5E6AD2`, bg: `#0a0a0a`, paper: `#111111`)
+- **Inter** — loaded via `next/font/google`, applied in `layout.tsx`
 - **Recharts 3** — pie charts
 - **Supabase JS 2** — database, auth, real-time
 - Path alias: `@/*` → `src/*`
+
+## Design System (ThemeRegistry.tsx)
+
+Single-accent minimal dark theme:
+- Background: `#0a0a0a`, Paper: `#111111`, Borders: `#1e1e1e`
+- Primary accent: `#5E6AD2` (Linear indigo) — used only for interactive elements
+- Semantic colors: success `#22c55e`, error `#ef4444`, warning `#f59e0b`, info `#3b82f6`
+- `borderRadius: 8`, no box shadows, no decorative gradients
+- Table heads styled via `MuiTableCell.head` override: `#0d0d0d` bg, uppercase gray labels
+- Contained buttons: solid `#5E6AD2`, no gradient

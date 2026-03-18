@@ -97,23 +97,11 @@ export default function DriverTable({
       <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#1565c0" }}>
-              <TableCell sx={{ color: "#fff", fontWeight: 700 }}>#</TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: 700 }}>
-                Driver Name
-              </TableCell>
-              <TableCell
-                sx={{ color: "#fff", fontWeight: 700 }}
-                align="center"
-              >
-                Vehicle Assigned
-              </TableCell>
-              <TableCell
-                sx={{ color: "#fff", fontWeight: 700 }}
-                align="center"
-              >
-                Followed Plan
-              </TableCell>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Driver Name</TableCell>
+              <TableCell align="center">Vehicle Assigned</TableCell>
+              <TableCell align="center">Followed Plan</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -122,11 +110,7 @@ export default function DriverTable({
               return (
                 <TableRow
                   key={driver.id}
-                  sx={{
-                    "&:nth-of-type(odd)": { backgroundColor: "action.hover" },
-                    "&:hover": { backgroundColor: "action.selected" },
-                    transition: "all 0.2s",
-                  }}
+                  sx={{ transition: "background-color 0.1s" }}
                 >
                   <TableCell>
                     <Typography variant="body2" fontWeight={500}>
