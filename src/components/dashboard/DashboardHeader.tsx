@@ -35,12 +35,14 @@ export default function DashboardHeader({ week, onWeekChange, onLogout }: Dashbo
       >
         Sign out
       </Button>
-      <Typography variant="h3" fontWeight={700} color="primary.main">
-        HOS Dashboard
+      <Typography variant="h3" sx={{ color: "#f5f5f5", letterSpacing: "-0.5px" }}>
+        HOS{" "}
+        <Box component="span" sx={{ color: "primary.main" }}>
+          Dashboard
+        </Box>
       </Typography>
-      <Typography variant="subtitle1" color="text.secondary" mt={0.5}>
-        Driver Compliance Overview &mdash; Vehicle Assignment &amp; Plan
-        Adherence
+      <Typography variant="body2" color="text.secondary" mt={0.5}>
+        Driver Compliance &mdash; Vehicle Assignment &amp; Plan Adherence
       </Typography>
 
       {/* Week navigation row */}

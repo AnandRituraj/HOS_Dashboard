@@ -62,14 +62,12 @@ export default function WeeklyAttendance({
       >
         <Table size="small">
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#1565c0" }}>
+            <TableRow>
               <TableCell
                 sx={{
-                  color: "#fff",
-                  fontWeight: 700,
                   position: "sticky",
                   left: 0,
-                  backgroundColor: "#1565c0",
+                  backgroundColor: "#0d0d0d",
                   zIndex: 2,
                   minWidth: 180,
                 }}
@@ -82,18 +80,18 @@ export default function WeeklyAttendance({
                   <TableCell
                     key={date}
                     align="center"
-                    sx={{ color: "#fff", fontWeight: 700, minWidth: 70 }}
+                    sx={{ minWidth: 70 }}
                   >
                     <Box>
                       <Typography
                         variant="caption"
-                        sx={{ fontWeight: 700, color: "#fff", display: "block" }}
+                        sx={{ fontWeight: 600, display: "block", color: "#666", fontSize: "0.72rem", letterSpacing: "0.07em" }}
                       >
                         {label.day}
                       </Typography>
                       <Typography
                         variant="caption"
-                        sx={{ color: "rgba(255,255,255,0.8)" }}
+                        sx={{ color: "#555", fontSize: "0.72rem" }}
                       >
                         {label.date}
                       </Typography>
@@ -101,10 +99,7 @@ export default function WeeklyAttendance({
                   </TableCell>
                 );
               })}
-              <TableCell
-                align="center"
-                sx={{ color: "#fff", fontWeight: 700, minWidth: 80 }}
-              >
+              <TableCell align="center" sx={{ minWidth: 80 }}>
                 Total
               </TableCell>
             </TableRow>
@@ -117,17 +112,13 @@ export default function WeeklyAttendance({
               return (
                 <TableRow
                   key={driver.id}
-                  sx={{
-                    "&:nth-of-type(odd)": { backgroundColor: "action.hover" },
-                    "&:hover": { backgroundColor: "action.selected" },
-                    transition: "all 0.2s",
-                  }}
+                  sx={{ transition: "background-color 0.1s" }}
                 >
                   <TableCell
                     sx={{
                       position: "sticky",
                       left: 0,
-                      backgroundColor: "background.paper",
+                      backgroundColor: "#111111",
                       zIndex: 1,
                     }}
                   >
@@ -144,7 +135,7 @@ export default function WeeklyAttendance({
                         color="success"
                         sx={{
                           "&.Mui-checked": {
-                            color: "#66bb6a",
+                            color: "success.main",
                           },
                         }}
                       />

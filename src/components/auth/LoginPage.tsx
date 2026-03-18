@@ -39,15 +39,29 @@ export default function LoginPage() {
       minHeight="100vh"
       px={2}
     >
-      <Card sx={{ width: "100%", maxWidth: 400 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-            <LocalShippingIcon color="primary" sx={{ fontSize: 48, mb: 1 }} />
-            <Typography variant="h5" fontWeight={700} color="primary.main">
-              HOS Dashboard
+      <Card sx={{ width: "100%", maxWidth: 380, border: "1px solid #2a2a2a" }}>
+        <CardContent sx={{ p: "32px 36px" }}>
+          <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: "10px",
+                backgroundColor: "#1a1a1a",
+                border: "1px solid #2a2a2a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 2.5,
+              }}
+            >
+              <LocalShippingIcon sx={{ fontSize: 22, color: "#5E6AD2" }} />
+            </Box>
+            <Typography variant="h6" fontWeight={600} color="text.primary">
+              Sign in to HOS Dashboard
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={0.5}>
-              Sign in to continue
+              Fleet compliance tracking
             </Typography>
           </Box>
 
@@ -60,6 +74,7 @@ export default function LoginPage() {
               required
               fullWidth
               autoComplete="email"
+              size="small"
             />
             <TextField
               label="Password"
@@ -69,14 +84,15 @@ export default function LoginPage() {
               required
               fullWidth
               autoComplete="current-password"
+              size="small"
             />
-            {error && <Alert severity="error">{error}</Alert>}
+            {error && <Alert severity="error" sx={{ fontSize: "0.82rem" }}>{error}</Alert>}
             <Button
               type="submit"
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ mt: 1 }}
+              sx={{ mt: 0.5, py: 1 }}
             >
               {loading ? "Signing in…" : "Sign in"}
             </Button>

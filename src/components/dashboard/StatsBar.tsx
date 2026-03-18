@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import { Paper, Typography, Box } from "@mui/material";
-import PeopleIcon from "@mui/icons-material/People";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import { Box, Typography } from "@mui/material";
 import { Driver } from "@/types";
 
 interface StatsBarProps {
@@ -21,69 +18,86 @@ export default function StatsBar({
   planYes,
 }: StatsBarProps) {
   const total = driversWhoWorked;
-
-  const vehiclePct =
-    total > 0 ? ((vehicleYes / total) * 100).toFixed(1) : "0";
-  const planPct =
-    total > 0 ? ((planYes / total) * 100).toFixed(1) : "0";
+  const vehiclePct = total > 0 ? ((vehicleYes / total) * 100).toFixed(1) : "—";
+  const planPct = total > 0 ? ((planYes / total) * 100).toFixed(1) : "—";
 
   const stats = [
     {
       label: "Total Drivers",
       value: `${drivers.length}`,
-      sub: `${total} worked this week`,
-      icon: <PeopleIcon sx={{ fontSize: 36, color: "primary.main" }} />,
-      color: "primary.main",
+      sub: `${total} active this week`,
     },
     {
       label: "Vehicle Assigned",
-      value: `${vehicleYes}/${total} (${vehiclePct}%)`,
-      sub: "all worked days",
-      icon: (
-        <DirectionsCarIcon sx={{ fontSize: 36, color: "success.main" }} />
-      ),
-      color: "success.main",
+      value: vehiclePct === "—" ? "—" : `${vehiclePct}%`,
+      sub: `${vehicleYes} of ${total} drivers`,
+      valueColor:
+        total === 0
+          ? "#888"
+          : Number(vehiclePct) >= 80
+            ? "#22c55e"
+            : Number(vehiclePct) >= 50
+              ? "#f59e0b"
+              : "#ef4444",
     },
     {
       label: "Followed Plan",
-      value: `${planYes}/${total} (${planPct}%)`,
-      sub: "all worked days",
-      icon: (
-        <AssignmentTurnedInIcon sx={{ fontSize: 36, color: "info.main" }} />
-      ),
-      color: "info.main",
+      value: planPct === "—" ? "—" : `${planPct}%`,
+      sub: `${planYes} of ${total} drivers`,
+      valueColor:
+        total === 0
+          ? "#888"
+          : Number(planPct) >= 80
+            ? "#22c55e"
+            : Number(planPct) >= 50
+              ? "#f59e0b"
+              : "#ef4444",
     },
   ];
 
   return (
-    <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
+    <Box display="flex" gap={2} flexWrap="wrap">
       {stats.map((stat) => (
-        <Paper
+        <Box
           key={stat.label}
-          elevation={2}
           sx={{
-            flex: "1 1 200px",
-            maxWidth: 320,
-            p: 2.5,
+            flex: "1 1 180px",
+            p: "20px 24px",
+            backgroundColor: "#111111",
+            border: "1px solid #1e1e1e",
             borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
+            transition: "border-color 0.15s",
+            "&:hover": { borderColor: "#333" },
           }}
         >
-          {stat.icon}
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {stat.label}
-            </Typography>
-            <Typography variant="h6" fontWeight={700} color={stat.color}>
-              {stat.value}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {stat.sub}
-            </Typography>
-          </Box>
-        </Paper>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#666",
+              mb: 1.5,
+            }}
+          >
+            {stat.label}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "2rem",
+              fontWeight: 700,
+              lineHeight: 1,
+              color: stat.valueColor ?? "#f5f5f5",
+              fontVariantNumeric: "tabular-nums",
+              mb: 0.75,
+            }}
+          >
+            {stat.value}
+          </Typography>
+          <Typography sx={{ fontSize: "0.8rem", color: "#555" }}>
+            {stat.sub}
+          </Typography>
+        </Box>
       ))}
     </Box>
   );
