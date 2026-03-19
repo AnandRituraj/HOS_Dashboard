@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -23,6 +24,12 @@ export default function ManagementSummary({
   editingSummary,
   setEditingSummary,
 }: ManagementSummaryProps) {
+  const [draft, setDraft] = useState(summary);
+
+  useEffect(() => {
+    setDraft(summary);
+  }, [summary]);
+
   return (
     <Box mb={4}>
       <Box
@@ -42,8 +49,11 @@ export default function ManagementSummary({
             variant="contained"
             size="small"
             startIcon={<SaveIcon />}
-            onClick={() => setEditingSummary(false)}
-            disabled={!summary.trim()}
+            onClick={() => {
+              setSummary(draft);
+              setEditingSummary(false);
+            }}
+            disabled={!draft.trim()}
           >
             Save
           </Button>
@@ -74,8 +84,8 @@ export default function ManagementSummary({
             placeholder={
               "- Driver compliance improved by 10% this week\n- 3 drivers missed plan due to route changes\n- Recommend additional training for new drivers\n- Vehicle assignment process needs review"
             }
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
             sx={{
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "background.paper",
